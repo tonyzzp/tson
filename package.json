@@ -1,7 +1,7 @@
 {
-  "name": "test_ts_decorator",
+  "name": "tson",
   "version": "1.0.0",
-  "description": "",
+  "description": "gson for typescript",
   "scripts": {
     "start": "node ./jsbuild/test.js"
   },
