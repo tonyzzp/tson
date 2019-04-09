@@ -1,8 +1,10 @@
 import { tson } from "./tson";
 
-
 class Friend {
     name = ""
+
+    @tson.fieldNumberArray()
+    luckyNumbers: number[] = []
 }
 
 class Reward {
@@ -31,15 +33,26 @@ class Parent {
 
     @tson.fieldNumberArray()
     ids: number[] = []
+
+    reward = new Reward()
+    friend = new Friend()
+
+    @tson.field({ type: Friend })
+    friend2 = {}
+
+    @tson.field({ type: "any" })
+    others = {}
 }
 
+
+tson.dump()
 
 console.log(
     tson.parse({
         name: "zzp",
         age: "18",
         open: "True",
-        friends: ["a", { name: "zzp2" }],
+        friends: ["a", { name: "zzp2", luckyNumbers: [6, 8, 9] }],
         rewards: {
             chips: 10000,
             diamond: "20z",
@@ -49,7 +62,11 @@ console.log(
             0: { item: "chips", val: 120 },
             1: { item: "diamond", val: "20" }
         },
-        ids: [1, "4", "a", true]
+        ids: [1, "4", "a", true],
+        reward: { item: "diamond", val: 123 },
+        friend: { name: "zzp", luckyNumbers: [99, "88"] },
+        friend2: { name: "zzp", luckyNumbers: [99, "88"] },
+        others: { s: "str", n: 1, b: true, ns: [1, 2, 3] }
     }, Parent)
 )
 
@@ -60,4 +77,11 @@ console.log(
         home: "China",
         hobby: "study",
     }, Reward)
+)
+
+console.log(
+    tson.parseArray([
+        { item: "chips", val: 100 },
+        { item: "diamond", val: 2 },
+    ], Reward)
 )

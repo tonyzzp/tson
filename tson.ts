@@ -11,7 +11,7 @@ export namespace tson {
     }
 
     type Options = {
-        type: "array" | "map"
+        type: "array" | "map" | "any" | Constructor<any>
         generic?: "string" | "number" | "boolean" | Constructor<any>
         k?: "string" | "number"
         v?: "string" | "number" | "boolean" | Constructor<any>
@@ -52,6 +52,10 @@ export namespace tson {
         return field({ type: "array", generic: "number" })
     }
 
+    export function dump() {
+        console.log(classes)
+    }
+
     function parseValue(v: any, type: any): any {
         if (type == "string") {
             return v.toString()
@@ -73,7 +77,7 @@ export namespace tson {
         if (typeof data != "object") {
             return rtn
         }
-        let classid = (clz.prototype as any).__tson_classid
+        let classid = (clz.prototype as any).__tson_classid || -1
         let classDesc: ClassDesc = classes[classid] || { id: null, constructor: null, fields: {} }
         let keys = Object.keys(rtn)
         for (let key of keys) {
@@ -84,36 +88,48 @@ export namespace tson {
             }
             if (t == "number" || t == "string" || t == "boolean") {
                 rtn[key] = parseValue(dv, t)
-            } else if (t == "object") {
-                let opts = classDesc.fields[key]
-                if (opts == null) {
-                    rtn[key] = dv
-                } else if (opts.type == "array") {
-                    rtn[key] = []
-                    let rv = rtn[key]
-                    if (dv instanceof Array) {
-                        for (let v of dv) {
-                            rv.push(parseValue(v, opts.generic))
-                        }
+                continue
+            }
+            let opts = classDesc.fields[key]
+            if (opts == null) {
+                rtn[key] = parse(dv, rtn[key].__proto__.constructor)
+            } else if (opts.type == "array") {
+                rtn[key] = []
+                let rv = rtn[key]
+                if (dv instanceof Array) {
+                    for (let v of dv) {
+                        rv.push(parseValue(v, opts.generic))
                     }
-                } else if (opts.type == "map") {
-                    rtn[key] = {}
-                    let rv = rtn[key]
-                    if (typeof dv == "object") {
-                        for (let k in dv) {
-                            if (opts.k == "number") {
-                                let nk = parseInt(k)
-                                if (nk != null && !isNaN(nk)) {
-                                    rv[nk] = parseValue(dv[k], opts.v)
-                                }
-                            } else {
-                                rv[k] = parseValue(dv[k], opts.v)
+                }
+            } else if (opts.type == "map") {
+                rtn[key] = {}
+                let rv = rtn[key]
+                if (typeof dv == "object") {
+                    for (let k in dv) {
+                        if (opts.k == "number") {
+                            let nk = parseInt(k)
+                            if (nk != null && !isNaN(nk)) {
+                                rv[nk] = parseValue(dv[k], opts.v)
                             }
+                        } else {
+                            rv[k] = parseValue(dv[k], opts.v)
                         }
                     }
                 }
+            } else if (opts.type == "any") {
+                rtn[key] = dv
+            } else {
+                rtn[key] = parseValue(dv, opts.type)
             }
         }
         return rtn
+    }
+
+    export function parseArray<T>(data: any[], clz: Constructor<T>): T[] {
+        let list: T[] = []
+        for (let v of data) {
+            list.push(parse(v, clz))
+        }
+        return list
     }
 }
