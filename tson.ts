@@ -40,7 +40,7 @@ export namespace tson {
         }
     }
 
-    export function fieldMapNS() {
+    export function fieldMapSN() {
         return field({ type: "map", k: "string", v: "number" })
     }
 
