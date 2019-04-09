@@ -1,0 +1,10 @@
+{
+  "name": "test_ts_decorator",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node ./jsbuild/test.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
