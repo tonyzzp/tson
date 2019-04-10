@@ -1,10 +1,17 @@
 import { tson } from "./tson";
 
+function convertFruits(s: string): string[] {
+    return s.split(",")
+}
+
 class Friend {
     name = ""
 
     @tson.fieldNumberArray()
     luckyNumbers: number[] = []
+
+    @tson.field({ transformer: convertFruits })
+    fruits: string[] = []
 }
 
 class Reward {
@@ -64,7 +71,7 @@ console.log(
         },
         ids: [1, "4", "a", true],
         reward: { item: "diamond", val: 123 },
-        friend: { name: "zzp", luckyNumbers: [99, "88"] },
+        friend: { name: "zzp", luckyNumbers: [99, "88"], fruits: "apple,orange" },
         friend2: { name: "zzp", luckyNumbers: [99, "88"] },
         others: { s: "str", n: 1, b: true, ns: [1, 2, 3] }
     }, Parent)

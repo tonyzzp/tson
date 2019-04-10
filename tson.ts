@@ -11,10 +11,11 @@ export namespace tson {
     }
 
     type Options = {
-        type: "array" | "map" | "any" | Constructor<any>
+        type?: "array" | "map" | "any" | Constructor<any>
         generic?: "string" | "number" | "boolean" | Constructor<any>
         k?: "string" | "number"
         v?: "string" | "number" | "boolean" | Constructor<any>
+        transformer?: (data: any) => any
     }
 
     let ID = 0
@@ -93,6 +94,8 @@ export namespace tson {
             let opts = classDesc.fields[key]
             if (opts == null) {
                 rtn[key] = parse(dv, rtn[key].__proto__.constructor)
+            } else if (opts.transformer != null) {
+                rtn[key] = opts.transformer(dv)
             } else if (opts.type == "array") {
                 rtn[key] = []
                 let rv = rtn[key]
