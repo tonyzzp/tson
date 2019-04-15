@@ -10,6 +10,10 @@ export namespace tson {
         new(): T
     }
 
+    function isConstructor(data: any): data is Constructor<any> {
+        return typeof data == "function"
+    }
+
     type Options = {
         type?: "array" | "map" | "any" | Constructor<any>
         generic?: "string" | "number" | "boolean" | Constructor<any>
@@ -73,13 +77,20 @@ export namespace tson {
         }
     }
 
-    export function parse<T>(data: any, clz: Constructor<T>): T {
-        let rtn: any = new clz()
+    export function parse<T>(data: any, clz: Constructor<T> | Object): T {
+        let classDesc: ClassDesc
+        let rtn: any
+        if (isConstructor(clz)) {
+            rtn = new clz()
+            let classid = (clz as any).prototype.__tson_classid || -1
+            classDesc = classes[classid] || { id: null, constructor: null, fields: {} }
+        } else {
+            rtn = clz
+            classDesc = { id: null, constructor: null, fields: {} }
+        }
         if (typeof data != "object") {
             return rtn
         }
-        let classid = (clz.prototype as any).__tson_classid || -1
-        let classDesc: ClassDesc = classes[classid] || { id: null, constructor: null, fields: {} }
         let keys = Object.keys(rtn)
         for (let key of keys) {
             let t = typeof rtn[key]
@@ -93,7 +104,12 @@ export namespace tson {
             }
             let opts = classDesc.fields[key]
             if (opts == null) {
-                rtn[key] = parse(dv, rtn[key].__proto__.constructor)
+                let proto = rtn[key].__proto__
+                if (proto == Object.prototype) {
+                    rtn[key] = parse(dv, rtn[key])
+                } else {
+                    rtn[key] = parse(dv, proto.constructor)
+                }
             } else if (opts.transformer != null) {
                 rtn[key] = opts.transformer(dv)
             } else if (opts.type == "array") {

@@ -49,6 +49,16 @@ class Parent {
 
     @tson.field({ type: "any" })
     others = {}
+
+    innerObj = {
+        id: 0,
+        name: "",
+        box: {
+            weight: 0,
+            color: "none",
+        },
+        friend: new Friend()
+    }
 }
 
 
@@ -73,7 +83,17 @@ console.log(
         reward: { item: "diamond", val: 123 },
         friend: { name: "zzp", luckyNumbers: [99, "88"], fruits: "apple,orange" },
         friend2: { name: "zzp", luckyNumbers: [99, "88"] },
-        others: { s: "str", n: 1, b: true, ns: [1, 2, 3] }
+        others: { s: "str", n: 1, b: true, ns: [1, 2, 3] },
+        innerObj: {
+            id: 10,
+            name: "obj",
+            box: {
+                weight: "100",
+                color: "red",
+                none: "not"
+            },
+            friend: { name: "zzp" }
+        }
     }, Parent)
 )
 
